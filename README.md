@@ -61,6 +61,7 @@ String user = "root";
 String password = "";
 
 Connection conn = DriverManager.getConnection(url, user, password);
+```
 
 
 ## Menjalankan Aplikasi
@@ -70,7 +71,6 @@ Connection conn = DriverManager.getConnection(url, user, password);
 ## Troubleshooting
 - **Error Koneksi Database**: Pastikan **MySQL server** di XAMPP sedang berjalan dan string koneksi Anda sudah benar.
 - **Library Tidak Ditemukan**: Pastikan bahwa Anda sudah menambahkan `mysql-connector-java-9.1.0.jar` ke dalam libraries proyek di NetBeans.
-
 
 
 # Struktur Proyek CRUD_App
