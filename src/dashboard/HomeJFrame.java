@@ -5,11 +5,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import javax.swing.table.DefaultTableModel;
+import java.awt.Toolkit;
 
 public class HomeJFrame extends javax.swing.JFrame {
 
     public HomeJFrame() {
         initComponents();
+        this.setTitle("Dashboard");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon.png")));
         Connection conn = DB_connection.getConnection();
         getData();
     }
@@ -74,9 +77,17 @@ public class HomeJFrame extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "NIM", "Nama", "Prodi", "Falkutas"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         table_data.setGridColor(new java.awt.Color(153, 153, 153));
         table_data.setRowHeight(30);
         jScrollPane1.setViewportView(table_data);
@@ -84,14 +95,36 @@ public class HomeJFrame extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel1.setText("NIM");
 
+        t_Nama.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         t_Nama.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 t_NamaActionPerformed(evt);
             }
         });
 
+        t_nim.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        t_nim.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                t_nimActionPerformed(evt);
+            }
+        });
+
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel3.setText("Nama");
+
+        t_Prodi.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        t_Prodi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                t_ProdiActionPerformed(evt);
+            }
+        });
+
+        Falkutas.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        Falkutas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FalkutasActionPerformed(evt);
+            }
+        });
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel4.setText("Prodi");
@@ -111,6 +144,11 @@ public class HomeJFrame extends javax.swing.JFrame {
 
         btn_update.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btn_update.setText("UPDATE");
+        btn_update.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_updateActionPerformed(evt);
+            }
+        });
 
         btn_delete.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btn_delete.setForeground(new java.awt.Color(204, 0, 51));
@@ -136,22 +174,25 @@ public class HomeJFrame extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(t_Nama, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                    .addComponent(t_Nama)
                     .addComponent(t_nim)
                     .addComponent(t_Prodi)
                     .addComponent(Falkutas)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel6)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(btn_add)
-                        .addGap(18, 18, 18)
-                        .addComponent(btn_update)
-                        .addGap(13, 13, 13)
-                        .addComponent(btn_cancel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_delete)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel6)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btn_add)
+                                .addGap(18, 18, 18)
+                                .addComponent(btn_update)
+                                .addGap(18, 18, 18)
+                                .addComponent(btn_cancel)
+                                .addGap(18, 18, 18)
+                                .addComponent(btn_delete)))
+                        .addGap(0, 69, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(t_Falkutas)
@@ -212,16 +253,98 @@ public class HomeJFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_t_NamaActionPerformed
 
     private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
-        // TODO add your handling code here:
+        String nim = t_nim.getText();
+        String nama = t_Nama.getText();
+        String prodi = t_Prodi.getText();
+        String fakultas = Falkutas.getText();
+
+        if(nim.isEmpty() && nama.isEmpty()){
+            javax.swing.JOptionPane.showMessageDialog(null, "NIM dan Nama tidak boleh kosong", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }else{
+            try {
+                String sql = "INSERT INTO mahasiswa (nim, nama, prodi, fakultas) VALUES (?, ?, ?, ?)";
+                PreparedStatement stmt = DB_connection.getConnection().prepareStatement(sql);
+                stmt.setString(1, nim);
+                stmt.setString(2, nama);
+                stmt.setString(3, prodi);
+                stmt.setString(4, fakultas);
+                stmt.executeUpdate();
+
+                t_nim.setText("");
+                t_Nama.setText("");
+                t_Prodi.setText("");
+                Falkutas.setText("");
+                stmt.close();
+                getData();
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+            }
+        }
+
     }//GEN-LAST:event_btn_addActionPerformed
 
     private void btn_deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = table_data.getSelectedRow();
+        if(selectedRow != -1){
+            String nim = table_data.getValueAt(selectedRow, 0).toString();
+            int choice = javax.swing.JOptionPane.showConfirmDialog(
+                null,
+                "Yakin menghapus data ini?",
+                "Konfirmasi",
+                javax.swing.JOptionPane.YES_NO_OPTION
+            );
+            if (choice != javax.swing.JOptionPane.YES_OPTION) {
+                return;
+            }
+            try {
+                String sql = "DELETE FROM mahasiswa WHERE nim = ?";
+                PreparedStatement stmt = DB_connection.getConnection().prepareStatement(sql);
+                stmt.setString(1, nim);
+                stmt.executeUpdate();
+                stmt.close();
+                getData();
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+            }
+        }
     }//GEN-LAST:event_btn_deleteActionPerformed
 
     private void btn_cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_cancelActionPerformed
-        // TODO add your handling code here:
+        t_nim.setText("");
+        t_Nama.setText("");
+        t_Prodi.setText("");
+        Falkutas.setText("");
     }//GEN-LAST:event_btn_cancelActionPerformed
+
+    private void t_nimActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_t_nimActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_t_nimActionPerformed
+
+    private void t_ProdiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_t_ProdiActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_t_ProdiActionPerformed
+
+    private void FalkutasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FalkutasActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_FalkutasActionPerformed
+
+    private void btn_updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_updateActionPerformed
+        int selectedRow = table_data.getSelectedRow();
+        if(selectedRow != -1){
+            String nim = table_data.getValueAt(selectedRow, 0).toString();
+            String nama = table_data.getValueAt(selectedRow, 1).toString();
+            String prodi = table_data.getValueAt(selectedRow, 2).toString();
+            String fakultas = table_data.getValueAt(selectedRow, 3).toString();
+
+            t_nim.setText(nim);
+            t_Nama.setText(nama);
+            t_Prodi.setText(prodi);
+            Falkutas.setText(fakultas);
+
+        }else{
+            javax.swing.JOptionPane.showMessageDialog(null, "Pilih data yang akan diubah", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btn_updateActionPerformed
 
     /**
      * @param args the command line arguments
